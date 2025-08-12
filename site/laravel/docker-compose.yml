@@ -1,11 +1,12 @@
-service:
+services:
   laravel_apps:
   build:
     context: .
     dockerfile: Dockerfile
-  container_name: laravel_apps
+    container_name: laravel_apps
   restart: unless-stopped
-  volumes:
-    - . :/var/www/html
-  networks:
-    - portainer_networks
+
+volumes:
+  - . :/var/www/html
+networks:
+  - portainer_networks
