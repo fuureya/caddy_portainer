@@ -1,0 +1,73 @@
+services:
+  caddy:
+    image: caddy:alpine
+    container_name: caddy
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    networks:
+      - portainer_networks
+    volumes:
+      - $PWD/conf:/etc/caddy
+      - $PWD/site:/srv
+      - caddy_data:/data
+      - caddy_config:/config
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    hostname: yourdomain.com
+    ports:
+      - "9443:9443"
+      - "9000:9000"
+    volumes:
+      - data_portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - portainer_networks
+    restart: unless-stopped
+
+  database_mariadb:
+    image: mariadb:latest
+    container_name: database_mariadb
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: mysql_database
+      MYSQL_USER: mysql_username
+      MYSQL_PASSWORD: mysql_password
+    volumes:
+      - mariadb:/var/lib/mysql
+    networks:
+      - portainer_networks
+
+  portainer_phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: portainer_phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: database_mariadb
+      MYSQL_ROOT_PASSWORD: root_passwrd
+    depends_on:
+      - database_mariadb
+    networks:
+      - portainer_networks
+    restart: unless-stopped
+
+volumes:
+  data_portainer:
+  mariadb:
+  caddy_data:
+  caddy_config:
+
+networks:
+  portainer_networks:
+    external: true
+    name: portainer_networks

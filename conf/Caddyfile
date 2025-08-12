@@ -1,0 +1,9 @@
+
+
+portainer.localhost {
+    reverse_proxy portainer:9000
+}
+
+phpmyadmin.localhost {
+    reverse_proxy portainer_phpmyadmin:8081
+}
